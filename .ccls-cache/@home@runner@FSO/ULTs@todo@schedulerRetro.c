@@ -7,6 +7,7 @@ extern int unblockevent;
 
 QUEUE ready;
 QUEUE waitinginevent[MAXTHREAD];
+int priority[MAXTHREAD];
 
 void scheduler(int arguments)
 {
@@ -44,11 +45,14 @@ void scheduler(int arguments)
 			_enqueue(&ready,callingthread);
 	}
 
-	if(event==TIMER)
+	if(event==TIMER)//Any time block ended will enqueue the current thread into ready line and will change threads
 	{
-		threads[callingthread].status=READY;//Any time block ended will enqueue the current thread into ready line and will change threads
-		_enqueue(&ready, callingthread);
-		changethread=1;
+    if(priority[callingthread] <= priority[currthread]){
+      threads[callingthread].status=READY;
+		  _enqueue(&ready, callingthread);
+		  changethread=1; 
+    }
+    priority[callingthread] = priority[callingthread]+1;// Will increase running thread priority
 	}
 	
 	if(changethread)

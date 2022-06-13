@@ -45,13 +45,6 @@ void scheduler(int arguments)
 			_enqueue(&ready,callingthread);
 	}
 
-  if(event == TIMER)
-  {
-    		  
-    threads[callingthread].status=READY;//Any time block ended will enqueue the current thread into ready line and will change threads
-		_enqueue(&ready, callingthread);
-		changethread=1;
-  }
 	
 	if(changethread)
 	{
