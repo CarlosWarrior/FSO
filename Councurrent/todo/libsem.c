@@ -14,6 +14,7 @@ int g=0;
 
 SEMAPHORE semaphore_get(int val)
 {
+	printf("semaphore_get");
 	// Solicitar memoria dinámica para una struct STRSEMAPHORE usando malloc
 	SEMAPHORE s = malloc(sizeof(struct STRSEMAPHORE));
 	// Inicializar el contador del semáforo con el valor de val
@@ -25,6 +26,7 @@ SEMAPHORE semaphore_get(int val)
 
 void semaphore_destroy(SEMAPHORE s)
 {
+	printf("semaphore_destroy");
 	// Destruir la cola
 	queue_destroy(s->queue);
 	// Liberar la memoria del semáforo
@@ -33,6 +35,7 @@ void semaphore_destroy(SEMAPHORE s)
 
 void semaphore_wait(SEMAPHORE s)
 {
+	printf("semaphore_wait");
 	int local = 1;
 	do { atomic_xchg(local,g); } while(local!=0);
 	// Aquí debes implementar la función semaphore_wait() haciendo que el hilo que tiene que esperar se bloquée de manera que no haya espera ocupada
@@ -50,6 +53,7 @@ void semaphore_wait(SEMAPHORE s)
 
 void semaphore_signal(SEMAPHORE s)
 {
+	printf("semaphore_signal");
 	int local = 1;
 	do { atomic_xchg(local,g); } while(local!=0);
 	// Aquí hay que implementar la función semaphore_signal() para que un hilo que esté bloqueado en
