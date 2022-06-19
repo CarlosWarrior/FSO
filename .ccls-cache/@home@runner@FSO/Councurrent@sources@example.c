@@ -39,6 +39,7 @@ void *hilo1(void *arg)
 
 int main()
 {
+
 	pthread_t tid[3];
 	int res;
 	int args[3];
@@ -48,10 +49,10 @@ int main()
 	srand(getpid());
 	
 	exmut=semaphore_get(1);
-
 	// Crea los hilos
 	for(i=0;i<3;i++)
 	{
+    printf("thread: %d\n",i);
 		args[i]=i;
 		res = pthread_create(&tid[i], NULL, hilo1, (void *) &args[i]);
 	}

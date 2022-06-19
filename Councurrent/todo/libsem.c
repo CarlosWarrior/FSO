@@ -15,7 +15,7 @@ int g=0;
 
 SEMAPHORE semaphore_get(int val)
 {
-	printf("semaphore_get");
+	printf("semaphore_get\n");
 	// Solicitar memoria dinámica para una struct STRSEMAPHORE usando malloc
 	SEMAPHORE s = malloc(sizeof(struct STRSEMAPHORE));
 	// Inicializar el contador del semáforo con el valor de val
@@ -27,25 +27,29 @@ SEMAPHORE semaphore_get(int val)
 
 void semaphore_destroy(SEMAPHORE s)
 {
-	printf("semaphore_destroy");
+  printf("semaphore_destroy\n");
+	int local = 1;
+	do { atomic_xchg(local,g); } while(local!=0);
 	// Destruir la cola
 	queue_destroy(s->queue);
 	// Liberar la memoria del semáforo
 	free(s);
+	g = 0;
+	local = 1;
 }
 
 void semaphore_wait(SEMAPHORE s)
 {
-	printf("semaphore_wait");
+	printf("semaphore_wait\n");
 	int local = 1;
-	do { atomic_xchg(local,g); } while(local==1);
+	do { atomic_xchg(local,g); } while(local!=0);
 	// Aquí debes implementar la función semaphore_wait() haciendo que el hilo que tiene que esperar se bloquée de manera que no haya espera ocupada
 	//	- Antes de bloquearlo hay que:
 	//	-	1.- Obtener el tid del hilo (pthread_self) y guardarlo en una variable.
 	int tid = pthread_self();
 	//	-	2.- Guardar el tid en la cola del semáforo con queue_offer
 	queue_offer(s->queue, tid);
-	s->count++;
+	s->count--;
 	//Un detalle muy importante es que antes de que el hilo se bloquée, debe liberar el atomic_xchg()
 	g = 0;
 	local = 1;
@@ -55,18 +59,16 @@ void semaphore_wait(SEMAPHORE s)
 
 void semaphore_signal(SEMAPHORE s)
 {
-	printf("semaphore_signal");
+	printf("semaphore_signal\n");
 	int local = 1;
-	do { atomic_xchg(local,g); } while(local==1);
+	do { atomic_xchg(local,g); } while(local!=0);
 	// Aquí hay que implementar la función semaphore_signal() para que un hilo que esté bloqueado en
 	// el semáforo s->queue se desbloquée y se actualize el contador del semáforo-
 	// Recuerda que esta función debe ejecutarse de manera atómica
 	int tid = pthread_self();
 	pthread_t polled = queue_poll(s->queue);
-	s->count--;
+	s->count++;
 	g = 0;
 	local = 1;
 	unblock_thread(polled);
 }
-
-
