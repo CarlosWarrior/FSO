@@ -56,8 +56,9 @@ void semaphore_signal(SEMAPHORE s)
 	// el semáforo s->queue se desbloquée y se actualize el contador del semáforo-
 	// Recuerda que esta función debe ejecutarse de manera atómica
 	int tid = pthread_self();
+	g = 0;
+	local = s->count;
 	unblock_thread( queue_poll(s->queue) );
-	
 }
 
 
