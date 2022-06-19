@@ -1,6 +1,7 @@
 #include <pthread_utils.h>
 #include <stdlib.h>
 #include <libsem.h>
+#include <stdio.h>
 
 // Macro que incluye el código de la instrucción máquina xchg
 #define atomic_xchg(A,B) 	__asm__ __volatile__(	\
@@ -44,9 +45,10 @@ void semaphore_wait(SEMAPHORE s)
 	int tid = pthread_self();
 	//	-	2.- Guardar el tid en la cola del semáforo con queue_offer
 	queue_offer(s->queue, tid);
+	s->count++;
 	//Un detalle muy importante es que antes de que el hilo se bloquée, debe liberar el atomic_xchg()
 	g = 0;
-	local = s->count;
+	local = 1;
 	//	-	3.- Finalmente bloquear al hilo (block_thread)
 	block_thread();
 }
@@ -61,9 +63,10 @@ void semaphore_signal(SEMAPHORE s)
 	// Recuerda que esta función debe ejecutarse de manera atómica
 	int tid = pthread_self();
 	pthread_t polled = queue_poll(s->queue);
-	g = 0;
-	local = s->count;
+	s->count--;
 	unblock_thread(polled);
+	g = 0;
+	local = 1;
 }
 
 

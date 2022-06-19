@@ -39,6 +39,7 @@ void *hilo1(void *arg)
 
 int main()
 {
+	printf("main");
 	pthread_t tid[3];
 	int res;
 	int args[3];
