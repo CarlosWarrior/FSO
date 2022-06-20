@@ -11,11 +11,12 @@
 							);
 
 int g=0;
+int g2 = 0;
 
 
 SEMAPHORE semaphore_get(int val)
 {
-	printf("semaphore_get");
+	printf("semaphore_get\n");
 	// Solicitar memoria dinámica para una struct STRSEMAPHORE usando malloc
 	SEMAPHORE s = malloc(sizeof(struct STRSEMAPHORE));
 	// Inicializar el contador del semáforo con el valor de val
@@ -27,7 +28,6 @@ SEMAPHORE semaphore_get(int val)
 
 void semaphore_destroy(SEMAPHORE s)
 {
-	printf("semaphore_destroy");
 	// Destruir la cola
 	queue_destroy(s->queue);
 	// Liberar la memoria del semáforo
@@ -36,37 +36,41 @@ void semaphore_destroy(SEMAPHORE s)
 
 void semaphore_wait(SEMAPHORE s)
 {
-	printf("semaphore_wait");
 	int local = 1;
-	do { atomic_xchg(local,g); } while(local==1);
-	// Aquí debes implementar la función semaphore_wait() haciendo que el hilo que tiene que esperar se bloquée de manera que no haya espera ocupada
-	//	- Antes de bloquearlo hay que:
-	//	-	1.- Obtener el tid del hilo (pthread_self) y guardarlo en una variable.
-	int tid = pthread_self();
-	//	-	2.- Guardar el tid en la cola del semáforo con queue_offer
-	queue_offer(s->queue, tid);
-	s->count++;
-	//Un detalle muy importante es que antes de que el hilo se bloquée, debe liberar el atomic_xchg()
+	do { atomic_xchg(local,g); printf("wait\n");} while(local!=0);
+	s->count--;
+	if(s->count < 0){
+		// Aquí debes implementar la función semaphore_wait() haciendo que el hilo que tiene que esperar se bloquée de manera que no haya espera ocupada
+		//	- Antes de bloquearlo hay que:
+		//	-	1.- Obtener el tid del hilo (pthread_self) y guardarlo en una variable.
+		int tid = pthread_self();
+		//	-	2.- Guardar el tid en la cola del semáforo con queue_offer
+		queue_offer(s->queue, tid);
+	  
+		//Un detalle muy importante es que antes de que el hilo se bloquée, debe liberar el atomic_xchg()
+		g = 0;
+		local = 1;
+		//	-	3.- Finalmente bloquear al hilo (block_thread)
+		block_thread();
+	}
 	g = 0;
 	local = 1;
-	//	-	3.- Finalmente bloquear al hilo (block_thread)
-	block_thread();
+
 }
 
 void semaphore_signal(SEMAPHORE s)
 {
-	printf("semaphore_signal");
 	int local = 1;
-	do { atomic_xchg(local,g); } while(local==1);
-	// Aquí hay que implementar la función semaphore_signal() para que un hilo que esté bloqueado en
-	// el semáforo s->queue se desbloquée y se actualize el contador del semáforo-
-	// Recuerda que esta función debe ejecutarse de manera atómica
-	int tid = pthread_self();
-	pthread_t polled = queue_poll(s->queue);
-	s->count--;
-	g = 0;
+	do { atomic_xchg(local,g2); printf("signal\n");} while(local!=0);
+	s->count++;
+	printf("count: %d", s->count);
+	if(s->count <=0 ){
+		// Aquí hay que implementar la función semaphore_signal() para que un hilo que esté bloqueado en
+		// el semáforo s->queue se desbloquée y se actualize el contador del semáforo-
+		// Recuerda que esta función debe ejecutarse de manera atómica
+		pthread_t polled = queue_poll(s->queue);
+		unblock_thread(polled);
+	}
+	g2 = 0;
 	local = 1;
-	unblock_thread(polled);
 }
-
-

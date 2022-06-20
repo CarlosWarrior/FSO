@@ -30,7 +30,7 @@ void *hilo1(void *arg)
 		printf("- %s Sale\n",pais[i]);
 		// Termina sección Crítica
 		
-		semaphore_signal(exmut);		
+		semaphore_signal(exmut);
 		
 		// Espera aleatoria fuera de la sección crítica
 		usleep(rand()%1000000);
@@ -39,7 +39,7 @@ void *hilo1(void *arg)
 
 int main()
 {
-	printf("main");
+
 	pthread_t tid[3];
 	int res;
 	int args[3];
@@ -49,7 +49,6 @@ int main()
 	srand(getpid());
 	
 	exmut=semaphore_get(1);
-
 	// Crea los hilos
 	for(i=0;i<3;i++)
 	{
