@@ -52,7 +52,6 @@ int main()
 	// Crea los hilos
 	for(i=0;i<3;i++)
 	{
-    printf("thread: %d\n",i);
 		args[i]=i;
 		res = pthread_create(&tid[i], NULL, hilo1, (void *) &args[i]);
 	}
